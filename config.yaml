@@ -1,0 +1,47 @@
+# Lab Attendance System Configuration
+
+models:
+  face_detector: 'models/yolov8n-face.pt'
+  face_recognizer: 'models/face_recognizer.pth'
+  id_card_detector: 'models/id_card_detector.pt'
+
+database:
+  path: 'attendance.db'
+  type: 'sqlite'
+
+recognition:
+  method: 'facenet'
+  embedding_size: 128
+  similarity_threshold: 0.65
+  min_face_size: 80
+  max_face_size: 640
+
+id_card:
+  classes: ['id_card', 'tag']
+  confidence_threshold: 0.2
+  iou_threshold: 0.45
+
+attendance:
+  prevent_duplicate_daily: true
+  min_confidence: 0.7
+  working_hours: [9, 17]
+
+camera:
+  device_id: 0
+  width: 1280
+  height: 720
+  fps: 30
+
+paths:
+  face_dataset: 'datasets/faces'
+  id_card_dataset: 'datasets/id_cards'
+  logs: 'logs'
+
+logging:
+  level: 'INFO'
+  file: 'logs/attendance.log'
+
+web:
+  host: '0.0.0.0'
+  port: 5000
+  debug: false

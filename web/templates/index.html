@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lab Attendance Dashboard — Real-time attendance tracking with face recognition and ID card detection.">
+    <title>Lab Attendance Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────────────────── -->
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <span class="brand-icon">📊</span>
+        <h1>Lab Attendance</h1>
+    </div>
+    <ul class="nav-links">
+        <li><a href="#" class="nav-link active" data-page="dashboard"><span class="icon">🏠</span> Dashboard</a></li>
+        <li><a href="#" class="nav-link" data-page="records"><span class="icon">📋</span> Records</a></li>
+        <li><a href="#" class="nav-link" data-page="students"><span class="icon">👤</span> Students</a></li>
+        <li><a href="#" class="nav-link" data-page="analytics"><span class="icon">📈</span> Analytics</a></li>
+    </ul>
+    <div class="sidebar-footer">
+        <p>v1.0 &bull; YOLOv8 + FaceNet</p>
+    </div>
+</nav>
+
+<!-- ── Main content ────────────────────────────────────────── -->
+<main class="main-content">
+
+    <!-- Mobile hamburger -->
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+    <!-- ====== DASHBOARD PAGE ====== -->
+    <section class="page active" id="page-dashboard">
+        <header class="page-header">
+            <h2>Dashboard</h2>
+            <span class="timestamp" id="dashboardTime"></span>
+        </header>
+
+        <!-- Stat cards -->
+        <div class="stat-cards">
+            <div class="stat-card card-purple">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalStudents">0</span>
+                    <span class="stat-label">Total Students</span>
+                </div>
+            </div>
+            <div class="stat-card card-green">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="todayPresent">0</span>
+                    <span class="stat-label">Present Today</span>
+                </div>
+            </div>
+            <div class="stat-card card-blue">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="attendanceRate">0%</span>
+                    <span class="stat-label">Attendance Rate</span>
+                </div>
+            </div>
+            <div class="stat-card card-orange">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="avgConfidence">0%</span>
+                    <span class="stat-label">Avg Confidence</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's attendance table -->
+        <div class="glass-card">
+            <div class="card-header">
+                <h3>Today's Attendance</h3>
+                <button class="btn btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+            </div>
+            <div class="table-wrapper">
+                <table id="todayTable">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Time</th>
+                            <th>Confidence</th>
+                            <th>ID Card</th>
+                        </tr>
+                    </thead>
+                    <tbody id="todayBody"></tbody>
+                </table>
+                <p class="empty-state" id="todayEmpty" style="display:none;">No attendance records yet today.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== RECORDS PAGE ====== -->
+    <section class="page" id="page-records">
+        <header class="page-header">
+            <h2>Attendance Records</h2>
+        </header>
+
+        <!-- Filters -->
+        <div class="glass-card filter-bar">
+            <label>From <input type="date" id="filterStart"></label>
+            <label>To <input type="date" id="filterEnd"></label>
+            <button class="btn" id="filterBtn">Search</button>
+            <button class="btn btn-outline" id="exportRangeBtn">⬇ Export</button>
+        </div>
+
+        <div class="glass-card">
+            <div class="table-wrapper">
+                <table id="recordsTable">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Date & Time</th>
+                            <th>Confidence</th>
+                            <th>ID Card</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody"></tbody>
+                </table>
+                <p class="empty-state" id="recordsEmpty" style="display:none;">No records found for selected range.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== STUDENTS PAGE ====== -->
+    <section class="page" id="page-students">
+        <header class="page-header">
+            <h2>Registered Students</h2>
+        </header>
+
+        <div class="glass-card">
+            <div class="table-wrapper">
+                <table id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Registered</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsBody"></tbody>
+                </table>
+                <p class="empty-state" id="studentsEmpty" style="display:none;">No students registered yet.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== ANALYTICS PAGE ====== -->
+    <section class="page" id="page-analytics">
+        <header class="page-header">
+            <h2>Analytics</h2>
+            <div class="analytics-controls">
+                <select id="analyticsDays">
+                    <option value="7">Last 7 days</option>
+                    <option value="14">Last 14 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="chart-grid">
+            <div class="glass-card chart-card">
+                <h3>Daily Attendance Trend</h3>
+                <canvas id="dailyChart"></canvas>
+            </div>
+            <div class="glass-card chart-card">
+                <h3>Hourly Distribution</h3>
+                <canvas id="hourlyChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
